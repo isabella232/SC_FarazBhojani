@@ -97,28 +97,30 @@ depthDataMap?.normalize()
 let ciImage = CIImage(cvPixelBuffer: depthDataMap)
 depthDataMapImage = UIImage(ciImage: ciImage)
 ``` 
- 
-## Demo
- 
+  
 Great! We’ve now created our first filter! 
 Now if you run this, you should see the depth within the photo represented in grayscale with white objects being close to you and dark objects being far away. 
  
 I recommend running this on a device, as the simulator seems to be extremely slow at processing these filters. 
  
 ## Talking Head 
+
+[TODO Faraz: The original tutorail had a much expanded/better theory section than this, with a cool challenge about using your index figure to show stereoscopic vision. Why did you shorten this? Please expand this to cover at least what was covered in the tutorial, as this theory is extremely important to understand in order to follow the rest of the tutorial.]
  
 The iPhone’s dual cameras are like its eyes, looking at two images taken at a slight offset from one another. It corresponds features in the two images and calculates how many pixels they have moved. This change in pixels is called disparity.
  
 The farther an object is, the smaller the disparity but the larger the depth. 
 Depth is in fact the inverse of disparity and is equal to one over the disparity. 
 
-
 You’re going to use this slider, along with the depth data, to make a mask for the image at a certain depth. Then you’ll use this mask to filter the original image and create some neat effects!
 
+## Demo
 
 Open up DepthImageFilters.swift and find the createMask method with focus and scale. 
 
 Before we can convert the depth data into an image mask, we need to define some constants. These help to create our filter function based on the slope of our mask parameters, filter width, and focus. 
+
+[TODO Faraz: Please expand the description here. Think about what you will say as you type each line. The goal is to make sure the student understands each line you type.]
  
 ```
 let s1 = MaskParams.slope
@@ -128,8 +130,9 @@ let b1 = -s1 * (focus - filterWidth / 2)
 let b2 = -s2 * (focus + filterWidth / 2)
 ```
 
-
 Now we want to take the constants we created to input them into the function. We apply the filter to our depth image and store it into mask0. 
+
+[TODO Faraz: The code below is mising an explanation. The student would not understand how this works without an explanation. The original tutorial had an explanation but you remvoed it - why? Please add an explanation back in and make sure you explain everything you do in a screencast.]
 
 ```
 let mask0 = depthImage
@@ -143,6 +146,8 @@ let mask0 = depthImage
 
 
 Now we want to input our constants into the other side of our mask function.
+
+[TODO Faraz: Again, explanation is missing. I'm stopping the review here - please fix this issue for the rest of the script and let me know when it's ready for another look. Thanks!]
 
 ```
 let mask1 = depthImage
