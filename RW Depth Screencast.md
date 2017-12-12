@@ -104,8 +104,14 @@ Now if you run this, you should see the depth within the photo represented in gr
 I recommend running this on a device, as the simulator seems to be extremely slow at processing these filters. 
  
 ## Talking Head 
+ 
+In a nutshell, the iPhone’s dual cameras are imitating stereoscopic vision.
 
-[TODO Faraz: The original tutorail had a much expanded/better theory section than this, with a cool challenge about using your index figure to show stereoscopic vision. Why did you shorten this? Please expand this to cover at least what was covered in the tutorial, as this theory is extremely important to understand in order to follow the rest of the tutorial.]
+Try this. Hold your index finger closely in front of your nose and pointing upward. Close your left eye. Without moving your finger or head, simultaneously open your left eye and close your right eye.
+
+The closer an object is to your eyes, the larger the change in its relative position compared to the background. Does this sound familiar? It’s a parallax effect!
+
+Now quickly switch back and forth closing one eye and opening the other. Pay attention to the relative location of your finger to objects in the background. See how your finger seems to make large jumps left and right compared to objects further away?
  
 The iPhone’s dual cameras are like its eyes, looking at two images taken at a slight offset from one another. It corresponds features in the two images and calculates how many pixels they have moved. This change in pixels is called disparity.
  
@@ -118,9 +124,27 @@ You’re going to use this slider, along with the depth data, to make a mask for
 
 Open up DepthImageFilters.swift and find the createMask method with focus and scale. 
 
-Before we can convert the depth data into an image mask, we need to define some constants. These help to create our filter function based on the slope of our mask parameters, filter width, and focus. 
+The pixel value of your depth map image is equal to the normalized disparity. Remember, that a pixel value of 1.0 is white and a disparity value of 1.0 is the closest to the camera. On the other side of the scale, a pixel value of 0.0 is black and a disparity value of 0.0 is furthest from the camera.
 
-[TODO Faraz: Please expand the description here. Think about what you will say as you type each line. The goal is to make sure the student understands each line you type.]
+We want to create a function that uses the depth in the image to convert the image to greyscale. The closer the pixel is, the whiter it will be, and the farther away it is, the darker it will be.
+
+However, if we simply converted the image this way as we did previously, it would be boring. So we're going to spice things up and create a filter function that focusses on a specific depth of the image so that we can use a slider to change which part of the image is in focus for the filter. The pixels around the focal point will be white and will ramp down to black around that depth. 
+
+Before we can convert the depth data into an image mask, we need to define some constants. 
+
+These help to create our filter function based on the slope of our mask parameters, filter width, and focus. 
+
+s1 is the slope of our function that defines how fast we ramp up from a black pixel to a white pixel towards the focal point. 
+
+s2 is just the inverse of slope 1 for ramping back down after the focal point. 
+
+The filter width is the entire length of the filter. Since we are only focussing on a particular focal point, this includes the ramp up, focal point, and ramp down. 
+
+Note that to make the focal section a little more distinguishable, instead of only making a single point completely white, we make the pixels at that point white for a certain width (which is indicated by MaskParams.width). 
+
+We will separate the filter function into two masks, ramping up and ramping down.
+
+b1 is used to control where the ramping up mask is, and b2 is used to move where the ramping down mask is. 
  
 ```
 let s1 = MaskParams.slope
@@ -130,9 +154,14 @@ let b1 = -s1 * (focus - filterWidth / 2)
 let b2 = -s2 * (focus + filterWidth / 2)
 ```
 
-Now we want to take the constants we created to input them into the function. We apply the filter to our depth image and store it into mask0. 
+Now we want to take the constants we created to input them into the first mask (mask0) which ramps up pixels before the focal point towards white. 
 
-[TODO Faraz: The code below is mising an explanation. The student would not understand how this works without an explanation. The original tutorial had an explanation but you remvoed it - why? Please add an explanation back in and make sure you explain everything you do in a screencast.]
+Let's take our depth image and apply a filter to it. We want to base the greyscale values to be based on the slope that ramps up to white (s1). Let's apply that to the red, green, and blue vectors of the mask. 
+
+Now we want to translate this function based on this slope, the focal point, and the width of the function. Luckily we already calculated this as b1. Let's input this into the bias vector of the mask.
+
+Now we want to apply a clamp on the colour so that we don't have values above 1 or below 0.  
+
 
 ```
 let mask0 = depthImage
@@ -145,9 +174,8 @@ let mask0 = depthImage
 ```
 
 
-Now we want to input our constants into the other side of our mask function.
-
-[TODO Faraz: Again, explanation is missing. I'm stopping the review here - please fix this issue for the rest of the script and let me know when it's ready for another look. Thanks!]
+Now we want to input our constants into the other side of our function which applies a ramping down mask and applies it to the depth image.
+We want to do the same thing we did before, however now using s2 to ramp down and b2 to move the second slope to where it needs to be. 
 
 ```
 let mask1 = depthImage
@@ -158,7 +186,6 @@ let mask1 = depthImage
     "inputBiasVector": CIVector(x: b2, y: b2, z: b2, w: 0)])
   .applyingFilter("CIColorClamp")
 ```
-
 
 Now, put the two masks together.
 
@@ -212,7 +239,6 @@ Congratulations! You’ve written your first depth inspired filter!
 
 Now let’s create another filter that highlights colour in a grayscale image. 
 
-
 First we need to convert the image into a grayscale image. 
 
 Open DepthImageFilters.swift and below the spotlightHighlight function
@@ -224,9 +250,15 @@ you just wrote, add the following new method:
 This should look familiar. It’s almost exactly the same as the spotlightHighlight(image:mask:orientation:) filter you just wrote. The one difference is that this time you set the background image to be a greyscale version of the original image.
 This filter will show full color at the focal point based on the slider position and fade to grey from there.
 
-The function will take in the image, mask, and current device orientation. We will have two filtered images; one greyscale image, and another output image which uses the greyscale image and blurs it with the original. 
+The function will take in the image, mask, and current device orientation. 
 
-Now we just create our final image and return it. 
+We will have two filtered images; one greyscale image, and another output image which uses the greyscale image and blurs it with the original. 
+
+Let's use the Photo Effect Mono filter to create the grayscale image. 
+
+Now let's apply the blending mask between the original image and the greyscale image, while using our depth mask we created previously to focus on applying the colour to a specific depth in our new image. 
+
+Now we just generate our image to a cgImage, and then convert it into a UIImage and return it. 
 
 ```
 func colorHighlight(image: CIImage, mask: CIImage, orientation: UIImageOrientation = .up) -> UIImage? {
@@ -259,8 +291,12 @@ That’s exactly the depth-inspired filter you’ll be writing next!
 
 Under your colorHightlight(image:mask:orientation:) method in DepthImageFilters.swift, let's add a blur function so that we can switch the focus of what we are looking at.
 
-First, you invert the mask.
+Let's name this function blur, which takes in an image, mask, and orientation. This method will return a UIImage. 
+
+First, you create a mask that will invert the colour.
 Then you apply the CIMaskedVariableBlur filter, which is new with iOS 11. This filter will blur using a radius equal to the inputRadius * mask pixel value. So when the mask pixel value is 1.0, the blur is at its max, which is why you needed to invert the mask first.
+We don't want to blur what we are supposed to be focussing on! 
+
 Once again, you generate a CGImage using the CIContext and use it to create a UIImage and return it.
 
 ```
