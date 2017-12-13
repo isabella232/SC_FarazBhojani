@@ -1,5 +1,7 @@
 Introduction to Depth Data Screencast Script
 
+[TODO Faraz: Add metadata at top of each script, according to writing guide phase 3]
+
 ## Talking Head
 
 Hey what’s up everybody, this is Faraz. In this video, I’m going to show you how you can create filters to alter photos using depth data. 
@@ -104,7 +106,9 @@ Now if you run this, you should see the depth within the photo represented in gr
 I recommend running this on a device, as the simulator seems to be extremely slow at processing these filters. 
  
 ## Talking Head 
- 
+
+[TODO Faraz: make slides for this talking section and any other talknig section that can benefit. You can re-use the illustrations from the tutorial.]
+
 In a nutshell, the iPhone’s dual cameras are imitating stereoscopic vision.
 
 Try this. Hold your index finger closely in front of your nose and pointing upward. Close your left eye. Without moving your finger or head, simultaneously open your left eye and close your right eye.
@@ -112,23 +116,31 @@ Try this. Hold your index finger closely in front of your nose and pointing upwa
 The closer an object is to your eyes, the larger the change in its relative position compared to the background. Does this sound familiar? It’s a parallax effect!
 
 Now quickly switch back and forth closing one eye and opening the other. Pay attention to the relative location of your finger to objects in the background. See how your finger seems to make large jumps left and right compared to objects further away?
- 
+
 The iPhone’s dual cameras are like its eyes, looking at two images taken at a slight offset from one another. It corresponds features in the two images and calculates how many pixels they have moved. This change in pixels is called disparity.
  
 The farther an object is, the smaller the disparity but the larger the depth. 
 Depth is in fact the inverse of disparity and is equal to one over the disparity. 
 
-You’re going to use this slider, along with the depth data, to make a mask for the image at a certain depth. Then you’ll use this mask to filter the original image and create some neat effects!
+You’re going to use this slider, along with the depth data, to make a mask for the image at a certain depth. Then you’ll use this mask to filter the original image and create a neat effect!
 
-## Demo
+How will we do this? Well, first, it's helpful to think of the depth data map as the following function:
 
-Open up DepthImageFilters.swift and find the createMask method with focus and scale. 
+[Show slide for pixel value vs. disparity here]
 
 The pixel value of your depth map image is equal to the normalized disparity. Remember, that a pixel value of 1.0 is white and a disparity value of 1.0 is the closest to the camera. On the other side of the scale, a pixel value of 0.0 is black and a disparity value of 0.0 is furthest from the camera.
 
 We want to create a function that uses the depth in the image to convert the image to greyscale. The closer the pixel is, the whiter it will be, and the farther away it is, the darker it will be.
 
-However, if we simply converted the image this way as we did previously, it would be boring. So we're going to spice things up and create a filter function that focusses on a specific depth of the image so that we can use a slider to change which part of the image is in focus for the filter. The pixels around the focal point will be white and will ramp down to black around that depth. 
+However, if we simply converted the image this way as we did previously, it would be boring. So we're going to spice things up and create a filter function that focusses on a specific depth of the image so that we can use a slider to change which part of the image is in focus for the filter. 
+
+[TODO Faraz: Add missing section from tutorial about "Using a slope of 4.0, a width of 0.1, and 0.75 as the focal point.." and slide to go along with it here.]
+
+The pixels around the focal point will be white and will ramp down to black around that depth. Let's see how this works.
+
+## Demo
+
+Open up DepthImageFilters.swift and find the createMask method with focus and scale. 
 
 Before we can convert the depth data into an image mask, we need to define some constants. 
 
@@ -235,6 +247,8 @@ Replace the code for the .spotlight case to be:
 finalImage = depthFilters?.spotlightHighlight(image: filterImage, mask: mask, orientation: orientation)
 Congratulations! You’ve written your first depth inspired filter!
 
+[TODO Faraz: Split here]
+
 ## Filter #2
 
 Now let’s create another filter that highlights colour in a grayscale image. 
@@ -328,8 +342,10 @@ finalImage = depthFilters?.blur(image: filterImage, mask: mask, orientation: ori
 
 Now let’s run this and check out the filter. Notice how we can use a slider to focus on the object we want to focus on, after the fact!
 
+## Talking Head
+
 Alright, that’s everything I’d like to cover in this video.
 At this point, you should understand how to deal with depth data, and how to create neat filters using depth.
 
-Speaking of… Apple’s so dumb… two cameras for depth??? I just use 3d glasses whenever I wanna see depth. 
+I hope this screencast 
 Anyways – I’m out!
