@@ -16,18 +16,18 @@
 
 ## Talking Head
 
-Hey what’s up everybody, this is Faraz. In this video, I’m going to show you how to alter photos using depth data. By the end of the video we will have made a spotlight filter to change the position of lighting in an image based on depth. 
+Hey what’s up everybody, this is Jessy. In this screencast, Faraz Bhojani are going to show you how to alter photos using depth data. By the end of the video we will have made a spotlight filter to change the position of lighting in an image based on depth. 
 
-The iPhone 7+, 8 and 8+, and the iPhone X have a dual camera system which allows  you to capture depth information when taking pictures in portrait mode. This is similar to depth data captured from an Xbox Kinect’s infared sensors, except without the infared. 
+The iPhone 7+, 8 and 8+, and the iPhone X all have dual camera systems which allow you to capture depth information when taking pictures in portrait mode. If you've used a Microsoft Xbox Kinect, it's a similar idea. But with an iPhone, there's no infrared sensor involved.
 
 [Slide 01]
 
-“This screencast is based on a tutorial created by team member Yono Mittlefehldt
- If you like this screencast, be sure to give him a follow on twitter.”
+This screencast is based on a tutorial created by raywenderlich.com team member Yono Mittlefehldt. If you like this screencast, be sure to give him a follow on Twitter.
 
-Alright, now lets implement some filters using depth data. 
+And now, Faraz is going to implement some filters using depth data. 
 
 ## Demo
+### 1_GettingStarted_initialDemo.mov
 
 [Demo begins with starter project running on the screen]
 
@@ -37,6 +37,9 @@ Let’s start with coding a visual representation for the depth in an image. We�
 
 You generally use AVDepthData to extract this auxiliary data from an image, so that’s the first step.
 
+---
+
+### 2_screencast_first.mov
 
 Open DepthReader.swift, we will start by adding a method to DepthReader to obtain the depth data map from an image:
  
@@ -87,7 +90,9 @@ func depthDataMap() -> CVPixelBuffer? {
 }
 ```
 
+---
 
+### Missing?
 
 Now before you can run this, you need to update DepthImageViewController.swift.
 
@@ -145,8 +150,11 @@ Depth is in fact the inverse of disparity and is equal to one over the disparity
 You’re going to use this slider, along with the depth data, to make a mask for the image at a certain depth. Then you’ll use this mask to filter the original image and create some neat effects!
 
 ## Demo
+### 3_screencast_masks
 
 Open up DepthImageFilters.swift and find the createMask method with focus and scale. 
+
+---
 
 [Slide 06] 
 
@@ -158,6 +166,7 @@ We want to create a function that uses the depth in the image to convert the ima
 
 However, if we simply converted the image this way as we did previously, it would be boring. So we're going to spice things up and create a filter function that focusses on a specific depth of the image so that we can use a slider to change which part of the image is in focus for the filter. The pixels around the focal point will be white and will ramp down to black around that depth. 
 
+---
 [Back to the code]
 
 Before we can convert the depth data into an image mask, we need to define some constants. 
@@ -241,7 +250,11 @@ let combinedMask = mask0.applyingFilter("CIDarkenBlendMode", parameters: ["input
 Finally, replace the return line with:
 return mask
 
+---
+
 ## Demo
+
+### 4_MaskDemo.mov
 
 You should see something like this [show the screen of the device]
 
@@ -249,6 +262,11 @@ Now the depth map is interactive, and you can change the thresholds to which the
 
 Next, you’re going to create a filter that somewhat mimics a spotlight. The “spotlight” will shine on objects at a chosen depth and fade to black from there.
 And because you already put in the hard work reading in the depth data and creating the mask, it’s going to be super simple.
+
+---
+
+### 5_spotlight_1.mov
+
 Open DepthImageFilters.swift and add the following:
 
 Use the CIBlendWithMask filter and pass in the mask you created in the previous section. The filter essentially sets the alpha value of a pixel to the corresponding mask pixel value. So when the mask pixel value is 1.0, the image pixel is completely opaque and when the mask pixel value is 0.0, the image pixel is completely transparent. Since the UIView behind the UIImageView has a black color, black is what you see coming from behind the image.
@@ -272,10 +290,19 @@ func spotlightHighlight(image: CIImage, mask: CIImage, orientation: UIImageOrien
 ```
 
 To see this filter in action, you first need to tell DepthImageViewController to call this method when appropriate.
+
+---
+
+### 6_spotlight2.mov 
+
 Open DepthImageViewController.swift and go to updateImageView. Inside the .filtered case of the main switch statement, you’ll find a nested switch statement for the selectedFilter.
 Replace the code for the .spotlight case to be:
 finalImage = depthFilters?.spotlightHighlight(image: filterImage, mask: mask, orientation: orientation)
 Congratulations! You’ve written your first depth inspired filter!
+
+---
+
+### 7_spotlightDemo.mov
 
 Alright, that’s everything I’d like to cover in this video.
 At this point, you should understand how to start working with depth data, and how to create a cool spotlight filter!
